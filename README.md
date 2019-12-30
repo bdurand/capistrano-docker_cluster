@@ -1,4 +1,4 @@
-# Capistrano Docker Deploy
+# Capistrano Docker Cluster
 
 This gem provides a recipe to use capistrano to deploy docker applications.
 
@@ -75,7 +75,7 @@ set :docker_env, {"HOME" => "/root"}
 The deployment does not require a source control management system to perform the build. To turn off this feature you need to include this in your project's Capfile to include the Docker deployment recipe and turn off the default (git) SCM setting for capistrano.
 
 ```ruby
-  require 'capistrano/docker_deploy'
+  require 'capistrano/docker_cluster'
   install_plugin Capistrano::Scm::None::Plugin
 ```
 

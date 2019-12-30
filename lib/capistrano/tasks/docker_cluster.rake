@@ -117,8 +117,8 @@ namespace :docker do
       within fetch(:release_path) do
         execute(:mkdir, "-p", "bin")
         scripts = Capistrano::DockerDeploy::Scripts.new(self)
-        docker_deploy_path = File.join(__dir__, "..", "..", "..", "bin", "docker-cluster")
-        upload! docker_deploy_path, "bin/docker-cluster"
+        docker_cluster_path = File.join(__dir__, "..", "..", "..", "bin", "docker-cluster")
+        upload! docker_cluster_path, "bin/docker-cluster"
         upload! StringIO.new(scripts.start_script(host)), "bin/start"
         upload! StringIO.new(scripts.stop_script(host)), "bin/stop"
         upload! StringIO.new(scripts.run_script(host)), "bin/run"

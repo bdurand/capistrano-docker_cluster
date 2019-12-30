@@ -1,15 +1,15 @@
 # frozen_string_literal: true
 
-require_relative "lib/capistrano/docker_deploy/version"
+require_relative "lib/capistrano/docker_cluster/version"
 
 Gem::Specification.new do |spec|
-  spec.name          = "capistrano-docker_deploy"
+  spec.name          = "capistrano-docker_cluster"
   spec.version       = Capistrano::DockerDeploy::VERSION
   spec.authors       = ["Brian Durand"]
   spec.email         = ["bbdurand@gmail.com"]
 
   spec.summary       = %q{Use capistrano to deploy docker based applications.}
-  spec.homepage      = "https://github.com/bdurand/capistrano-docker_deploy"
+  spec.homepage      = "https://github.com/bdurand/capistrano-docker_cluster"
   spec.license       = "MIT"
 
   # Specify which files should be added to the gem when it is released.
