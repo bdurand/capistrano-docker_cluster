@@ -21,7 +21,7 @@ module Capistrano
         cases = []
         apps.each do |app|
           args = app_host_args(app, host)
-          cases << "  '#{app}')\n    #{cmd} #{args.join(' ')} --name '#{prefix}#{app}' --image '#{image_id}' ${args[*]}\n    ;;"
+          cases << "  '#{app}')\n    #{cmd} #{args.join(' ')} --name '#{prefix}#{app}' --image '#{image_id}' \"$@\"\n    ;;"
         end
 
         <<~BASH
@@ -36,14 +36,6 @@ module Capistrano
 
           typeset app=$1
           shift
-
-          declare -a args
-          typeset count=$#
-          for ((index=0; index<count; ++index)); do
-            typeset arg="$(printf "%q" "$1")"
-            args[index]="$(printf "%q" "$arg")"
-            shift
-          done
 
           case $app in
           #{cases.join("\n")}
@@ -65,14 +57,14 @@ module Capistrano
         app_args = fetch_for_host(host, :docker_app_args)
         apps.concat(app_args.keys) if app_args.is_a?(Hash)
         apps = apps.collect(&:to_s).uniq
-        
+
         cmd = "exec bin/docker-cluster"
         image_id = fetch(:docker_image_id)
 
         cases = []
         apps.each do |app|
           args = app_host_args(app, host)
-          cases << "  '#{app}')\n    #{cmd} #{args.join(' ')} --image '#{image_id}' --one-off ${args[*]}\n    ;;"
+          cases << "  '#{app}')\n    #{cmd} #{args.join(' ')} --image '#{image_id}' --one-off \"$@\"\n    ;;"
         end
 
         <<~BASH
@@ -87,14 +79,6 @@ module Capistrano
 
           typeset app=$1
           shift
-
-          declare -a args
-          typeset count=$#
-          for ((index=0; index<count; ++index)); do
-            typeset arg="$(printf "%q" "$1")"
-            args[index]="$(printf "%q" "$arg")"
-            shift
-          done
 
           case $app in
           #{cases.join("\n")}
