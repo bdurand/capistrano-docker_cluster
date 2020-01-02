@@ -36,7 +36,8 @@
 # parameter can be specified multiple times. The files should be property files in the form "arg=val" or "arg val" or "arg"
 # on each line. Comments can be used in the configuration files using "#".
 #
-# The --command parameter can be used to specify the command each docker container should run.
+# The --command parameter can be used to specify the command each docker container should run. If multiple command parameters
+# are specified, they will be concatenated together. You can use this to specify a command and arguments separately.
 #
 # The --force parameter can be used to specify that containers should always be restarted. The default behavior
 # is to only restart containers if they are not running the specified image.
