@@ -70,6 +70,40 @@ set :docker_user, "root"
 set :docker_env, {"HOME" => "/root"}
 ```
 
+## Server Scripts
+
+Scripts to control your docker applications are put into the `bin` directory in the capistrano target directory. These scripts are wrappers around the `bin/docker-cluster` script and supply the configuration values to that script for each app you've defined.
+
+### bin/start
+
+```bash
+bin/start app [additional arguments]
+```
+
+* The start script will start up the docker containers for you app.
+* If the containers are not running, they will be started.
+* If excess containers are running, they will be stopped.
+* If the containers are running, but they are running on a different image version, they will be replaced one at a time by new containers.
+
+
+### bin/stop
+
+```bash
+bin/stop app
+```
+
+* All the containers associated with the app will be stopped.
+
+### bin/run
+
+```bash
+bin/run app [additional arguments]
+```
+
+* Start a one off container with the specified app config.
+* The normal port mapping used for the cluster will not be included; if you want to expose ports, you'll need to supply the port mapping.
+* All apps defined in `docker_apps` as well as `docker_app_configs` and `docker_app_args` will be included as apps. This allows you to set up things like a "console" app which will open a console on a container for debugging, etc. without having it be part of the cluster apps.
+
 ## Capfile and SCM setting
 
 The deployment does not require a source control management system to perform the build. To turn off this feature you need to include this in your project's Capfile to include the Docker deployment recipe and turn off the default (git) SCM setting for capistrano.

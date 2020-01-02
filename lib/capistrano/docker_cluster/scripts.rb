@@ -57,7 +57,15 @@ module Capistrano
       # Build a custom command line run script with the configuration arguments for
       # each docker application on the host to run one off containers.
       def run_script(host)
+        # For the run script, all configured apps are included, not just the deployed ones.
+        # This allows configuring, for example, a "console" app to open up a console in a container.
         apps = Array(fetch_for_host(host, :docker_apps))
+        app_configs = fetch_for_host(host, :docker_app_configs)
+        apps.concat(app_configs.keys) if app_configs.is_a?(Hash)
+        app_args = fetch_for_host(host, :docker_app_args)
+        apps.concat(app_args.keys) if app_args.is_a?(Hash)
+        apps = apps.collect(&:to_s).uniq
+        
         cmd = "exec bin/docker-cluster"
         image_id = fetch(:docker_image_id)
 
