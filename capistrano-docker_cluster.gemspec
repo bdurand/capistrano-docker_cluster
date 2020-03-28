@@ -4,7 +4,7 @@ require_relative "lib/capistrano/docker_cluster/version"
 
 Gem::Specification.new do |spec|
   spec.name          = "capistrano-docker_cluster"
-  spec.version       = Capistrano::DockerDeploy::VERSION
+  spec.version       = Capistrano::DockerCluster::VERSION
   spec.authors       = ["Brian Durand"]
   spec.email         = ["bbdurand@gmail.com"]
 

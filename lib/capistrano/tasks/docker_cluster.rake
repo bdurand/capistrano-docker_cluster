@@ -87,7 +87,7 @@ namespace :docker do
   task :start do
     on release_roles(fetch(:docker_roles)) do |host|
       within "#{fetch(:deploy_to)}/current" do
-        scripts = Capistrano::DockerDeploy::Scripts.new(self)
+        scripts = Capistrano::DockerCluster::Scripts.new(self)
         Array(scripts.fetch_for_host(host, :docker_apps)).each do |app|
           as_docker_user do
             execute "bin/start", app
@@ -101,7 +101,7 @@ namespace :docker do
   task :stop do
     on release_roles(fetch(:docker_roles)) do |host|
       within "#{fetch(:deploy_to)}/current" do
-        scripts = Capistrano::DockerDeploy::Scripts.new(self)
+        scripts = Capistrano::DockerCluster::Scripts.new(self)
         Array(scripts.fetch_for_host(host, :docker_apps)).each do |app|
           as_docker_user do
             execute "bin/stop", app
@@ -116,7 +116,7 @@ namespace :docker do
     on release_roles(fetch(:docker_roles)) do |host|
       within fetch(:release_path) do
         execute(:mkdir, "-p", "bin")
-        scripts = Capistrano::DockerDeploy::Scripts.new(self)
+        scripts = Capistrano::DockerCluster::Scripts.new(self)
         docker_cluster_path = File.join(__dir__, "..", "..", "..", "bin", "docker-cluster")
         upload! docker_cluster_path, "bin/docker-cluster"
         upload! StringIO.new(scripts.start_script(host)), "bin/start"
@@ -130,7 +130,7 @@ namespace :docker do
   desc "Copy configuration files used to start the docker containers."
   task :copy_configs do
     on release_roles(fetch(:docker_roles)) do |host|
-      configs = Capistrano::DockerDeploy::Scripts.new(self).docker_config_map(host)
+      configs = Capistrano::DockerCluster::Scripts.new(self).docker_config_map(host)
       unless configs.empty?
         within fetch(:release_path) do
           execute(:mkdir, "-p", "config")

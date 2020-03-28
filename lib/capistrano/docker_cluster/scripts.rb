@@ -3,7 +3,7 @@
 require "time"
 
 module Capistrano
-  module DockerDeploy
+  module DockerCluster
     class Scripts
       def initialize(context)
         @context = context
