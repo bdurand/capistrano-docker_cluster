@@ -35,6 +35,5 @@ Gem::Specification.new do |spec|
 
   spec.add_dependency "capistrano", "~> 3.7"
   spec.add_dependency "capistrano-scm-none", "~> 0.1"
-  spec.add_development_dependency "bundler"
   spec.add_development_dependency "rake"
 end
