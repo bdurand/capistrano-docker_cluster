@@ -38,6 +38,8 @@
 #
 # The --command parameter can be used to specify the command each docker container should run. If multiple command parameters
 # are specified, they will be concatenated together. You can use this to specify a command and arguments separately.
+# You can also specify the command by using --. Anything after a double hyphen will be appended to the docker
+# command line verbatim.
 #
 # The --force parameter can be used to specify that containers should always be restarted. The default behavior
 # is to only restart containers if they are not running the specified image.
@@ -138,6 +140,11 @@ read_arguments() {
       --verbose )
         set -o xtrace
         CMD_OUT=/dev/stdout
+        ;;
+      -- )
+        shift
+        DOCKER_RUN_COMMAND="$DOCKER_RUN_COMMAND $@"
+        shift ${#@}
         ;;
       * )
         DOCKER_RUN_ARGS="$DOCKER_RUN_ARGS $1"
