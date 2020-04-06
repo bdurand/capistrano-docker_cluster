@@ -20,7 +20,7 @@
 # host port 8000 to container port 80 and the second mapping host port 8001 to container port 80.
 #
 # The --hostname parameter can be used to specify a base host name for the containers. The host name for each
-# container will be "container_name.base_host_hamer" where container name uses a hyphen instead of a period as
+# container will be "container_name.base_host_name" where container name uses a hyphen instead of a period as
 # the delimiter.
 #
 # The --healthcheck parameter can be used to specify either a command to run inside the container or a URL
