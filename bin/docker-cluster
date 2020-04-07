@@ -41,6 +41,9 @@
 # You can also specify the command by using --. Anything after a double hyphen will be appended to the docker
 # command line verbatim.
 #
+# The --clear-command flag can be used to clear the docker run command. Use this if you need to completely override
+# command that has already been set on the command line.
+#
 # The --force parameter can be used to specify that containers should always be restarted. The default behavior
 # is to only restart containers if they are not running the specified image.
 #
@@ -116,6 +119,9 @@ read_arguments() {
         [[ -z $val ]] && shift && val=$1
         DOCKER_RUN_COMMAND="$DOCKER_RUN_COMMAND $val"
         ;;
+      --clear-command )
+        DOCKER_RUN_COMMAND=""
+        ;;
       --one-off )
         ONE_OFF_CONTAINER="1"
         CONTAINER_NAME_PREFIX=""
@@ -150,7 +156,9 @@ read_arguments() {
       * )
         DOCKER_RUN_ARGS="$DOCKER_RUN_ARGS $1"
     esac
-    shift
+    if [ ${#@} -ne 0 ]; then
+      shift
+    fi
   done
 }
 
