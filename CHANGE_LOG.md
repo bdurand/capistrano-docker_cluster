@@ -1,3 +1,7 @@
+# 1.0.3
+
+* Fix use of `--` to send command arguments.
+
 # 1.0.2
 
 * Allow specifying app specific settings as capistrano variables `docker_app_configs_<app>` and `docker_app_args_<app>`.

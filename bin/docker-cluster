@@ -72,7 +72,8 @@ usage() {
 }
 
 read_arguments() {
-  while [ "$1" != "" ]; do
+  typeset finished=false
+  while [ "$1" != "" -a "$finished" != "true" ]; do
     typeset arg=$1
     typeset val=
     if [[ $arg =~ ^--?[^-]+ ]]; then
@@ -144,7 +145,7 @@ read_arguments() {
       -- )
         shift
         DOCKER_RUN_COMMAND="$DOCKER_RUN_COMMAND $@"
-        shift ${#@}
+        finished=true
         ;;
       * )
         DOCKER_RUN_ARGS="$DOCKER_RUN_ARGS $1"
