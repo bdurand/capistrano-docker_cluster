@@ -130,10 +130,22 @@ module Capistrano
         end
 
         apps = Array(fetch_for_host(host, :docker_apps))
-
         app_configs = app_configuration(fetch(:docker_app_configs, nil))
+        host_app_configs = app_configuration(host.properties.send(:docker_app_configs))
+        apps += app_configs.keys if app_configs
+        apps += host_app_configs.keys if host_app_configs
+        apps = apps.collect(&:to_s).uniq
+
+        if app_configs
+          app_configs.values.each do |paths|
+            Array(paths).each do |path|
+              configs[File.basename(path)] = path
+            end
+          end
+        end
+
         apps.each do |app|
-          Array(app_configs[app.to_s]).each do |path|
+          Array(fetch(:"docker_app_configs_#{app}")).each do |path|
             configs[File.basename(path)] = path
           end
         end
@@ -142,9 +154,16 @@ module Capistrano
           configs[File.basename(path)] = path
         end
 
-        host_app_configs = app_configuration(host.properties.send(:docker_app_configs))
+        if host_app_configs
+          host_app_configs.values.each do |paths|
+            Array(paths).each do |path|
+              configs[File.basename(path)] = path
+            end
+          end
+        end
+
         apps.each do |app|
-          Array(host_app_configs[app.to_s]).each do |path|
+          Array(host.properties.send(:"docker_app_configs_#{app}")).each do |path|
             configs[File.basename(path)] = path
           end
         end
@@ -182,24 +201,43 @@ module Capistrano
       end
 
       def app_host_args(app, host)
-        config_args = config_args(fetch(:docker_configs, nil))
+        global_config_args = config_args(fetch(:docker_configs, nil))
         command_args = Array(fetch(:docker_args, nil))
 
         host_config_args = config_args(host.properties.send(:docker_configs))
-        host_command_args = Array(host.properties.send(:"docker_args"))
+        host_command_args = Array(host.properties.send(:docker_args))
 
         app_configs = app_configuration(fetch(:docker_app_configs, {}))
         app_args = app_configuration(fetch(:docker_app_args, {}))
 
-        host_app_configs = app_configuration(host.properties.send(:"docker_app_configs"))
-        host_app_args = app_configuration(host.properties.send(:"docker_app_args"))
+        host_app_configs = app_configuration(host.properties.send(:docker_app_configs))
+        host_app_args = app_configuration(host.properties.send(:docker_app_args))
 
         app = app.to_s
         app_config_args = config_args(app_configs[app])
         app_command_args = Array(app_args[app])
         host_app_config_args = config_args(host_app_configs[app])
         host_app_command_args = Array(host_app_args[app])
-        args = config_args + command_args + app_config_args + app_command_args + host_config_args + host_command_args + host_app_config_args + host_app_command_args
+
+        inline_app_config_args = config_args(fetch(:"docker_app_configs_#{app}", nil))
+        inline_app_command_args = Array(fetch(:"docker_app_args_#{app}", nil))
+
+        host_inline_app_config_args = config_args(host.properties.send(:"docker_app_configs_#{app}"))
+        host_inline_app_command_args = Array(host.properties.send(:"docker_app_args_#{app}"))
+
+        args = global_config_args +
+               command_args +
+               app_config_args +
+               inline_app_config_args +
+               app_command_args +
+               inline_app_command_args +
+               host_config_args +
+               host_command_args +
+               host_app_config_args +
+               host_inline_app_config_args +
+               host_app_command_args +
+               host_inline_app_command_args
+
         args.uniq
       end
     end

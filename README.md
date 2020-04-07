@@ -32,9 +32,13 @@ The deployment is configured with the following properties in your capistrano re
 
 * `docker_app_configs` - Map of configuration files for starting specific docker apps.
 
+* `docker_configs_<app>` - List of global configuration files for starting a docker app.
+
 * `docker_args` - List of global command line arguments for all continers.
 
 * `docker_app_args` - Map of command line arguments for starting specific docker apps.
+
+* `docker_args_<app>` - List of global command line arguments for starting a specific docker app.
 
 Directory structures are ignored when configuration filse copies to servers for `docker_configs` and `docker_app_configs`. This means you can only have one file with a given base name in all you configuration files. So, `config/app/web.properties` and `config/production/web.properties` will both be copied to `confg/web.properties` on the servers. You can use this feature to overwrite whole files if you need to, but otherwise you'll need to use unique file names.
 
