@@ -17,15 +17,18 @@
 # port is the exposed port to map from the containers. The base host port is the port number to start mapping
 # the container ports to. If the base host port is not specified, then the container port will be used as the
 # base host port. For instance, `--port=80:8000 --count=2` will start two containers with the first one mapping
-# host port 8000 to container port 80 and the second mapping host port 8001 to container port 80.
+# host port 8000 to container port 80 and the second mapping host port 8001 to container port 80. You can use
+# --no-port to clear all port bindings.
 #
 # The --hostname parameter can be used to specify a base host name for the containers. The host name for each
 # container will be "container_name.base_host_name" where container name uses a hyphen instead of a period as
-# the delimiter.
+# the delimiter. You can use --no-hostname to clear the hostname to use the default.
 #
 # The --healthcheck parameter can be used to specify either a command to run inside the container or a URL
 # to ping from within the container to determine if the container is up. The next container will not be shutdown
-# until the previous one is determined to be up when this parameter is specified.
+# until the previous one is determined to be up when this parameter is specified. If this is not specified,
+# or if the value is "docker", the docker engine health check will be used. You can remove the healthcheck
+# altogether with --no-healthcheck.
 #
 # The --timeout parameter can be used to specify a timeout for how long to wait for a container to stop or start
 # before assuming something is wrong. In the case of stopping the container, the container will be force killed
@@ -39,10 +42,7 @@
 # The --command parameter can be used to specify the command each docker container should run. If multiple command parameters
 # are specified, they will be concatenated together. You can use this to specify a command and arguments separately.
 # You can also specify the command by using --. Anything after a double hyphen will be appended to the docker
-# command line verbatim.
-#
-# The --command flag can be used to clear the docker run command. Use this if you need to completely override
-# command that has already been set on the command line.
+# command line verbatim. You can clear the command buffer with --no-command.
 #
 # The --force parameter can be used to specify that containers should always be restarted. The default behavior
 # is to only restart containers if they are not running the specified image.
@@ -343,13 +343,8 @@ start_container() {
 
     typeset status=${info_arr[3]}
     if [[ $status == "Up"* ]]; then
-      if [[ $HEALTHCHECK != "" ]]; then
-        healthy=`docker_healthcheck $container_id "$HEALTHCHECK"`
-        if [[ $healthy == "0" ]]; then
-          success=0
-          break
-        fi
-      else
+      if [[ $HEALTHCHECK == "docker" ]]; then
+        # use built in docker health check
         if [[ $status == *"health"* ]]; then
           if [[ $status == *"healthy"* ]]; then
             success=0
@@ -359,6 +354,17 @@ start_container() {
           success=0
           break
         fi
+      elif [[ $HEALTHCHECK != "" ]]; then
+        # custom container command
+        healthy=`docker_healthcheck $container_id "$HEALTHCHECK"`
+        if [[ $healthy == "0" ]]; then
+          success=0
+          break
+        fi
+      else
+        # no health check
+        success=0
+        break
       fi
     fi
 
@@ -401,7 +407,7 @@ CONTAINER_NAME_PREFIX=
 CONTAINER_COUNT=1
 PORT_MAPPING=()
 DOCKER_RUN_COMMAND=
-HEALTHCHECK=
+HEALTHCHECK=docker
 TIMEOUT=120
 CMD_OUT=/dev/null
 DOCKER_RUN_ARGS=

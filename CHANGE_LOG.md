@@ -1,6 +1,7 @@
 # 1.0.5
 
 * Add "--no-" prefix on arguments to remove them.
+* Add ability to turn off healthcheck entirely.
 
 # 1.0.4
 
