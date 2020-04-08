@@ -1,3 +1,11 @@
+# 1.0.5
+
+* Add "--no-" prefix on arguments to remove them.
+
+# 1.0.4
+
+* Add --clear-command argument to clear the docker command buffer.
+
 # 1.0.3
 
 * Fix use of `--` to send command arguments.

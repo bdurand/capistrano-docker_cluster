@@ -41,7 +41,7 @@
 # You can also specify the command by using --. Anything after a double hyphen will be appended to the docker
 # command line verbatim.
 #
-# The --clear-command flag can be used to clear the docker run command. Use this if you need to completely override
+# The --command flag can be used to clear the docker run command. Use this if you need to completely override
 # command that has already been set on the command line.
 #
 # The --force parameter can be used to specify that containers should always be restarted. The default behavior
@@ -64,13 +64,14 @@ usage() {
   echo "  --name CONTAINER_NAME_PREFIX (or --one-off)"
   echo "  [--count CONTAINER_COUNT] (default 1)"
   echo "  [--image DOCKER_IMAGE] (image tag or id; required if --count > 0)"
-  echo "  [--port CONTAINER_PORT[:BASE_HOST_PORT]]"
-  echo "  [--hostname CONTAINER_BASE_HOST_NAME]"
-  echo "  [--healthcheck COMMAND|CURL_URL]"
+  echo "  [--[no-]port CONTAINER_PORT[:BASE_HOST_PORT]]"
+  echo "  [--[no-]hostname CONTAINER_BASE_HOST_NAME]"
+  echo "  [--[no-]healthcheck COMMAND|CURL_URL]"
   echo "  [--timeout SECONDS] (default 120)"
   echo "  [--config CONFIG_FILE_PATH]"
-  echo "  [--command DOCKER_RUN_COMMAND]"
-  echo "  [--verbose]"
+  echo "  [--[no-]command DOCKER_RUN_COMMAND]"
+  echo "  [--[no-]verbose]"
+  echo "  [--] docker command arguments"
   echo "  All other options are passed through to 'docker run'"
 }
 
@@ -103,9 +104,15 @@ read_arguments() {
         [[ -z $val ]] && shift && val=$1
         PORT_MAPPING+=($val)
         ;;
+      --no-port )
+        PORT_MAPPING=()
+        ;;
       --hostname )
         [[ -z $val ]] && shift && val=$1
         CONTAINER_BASE_HOST_NAME=$val
+        ;;
+      --hostname )
+        CONTAINER_BASE_HOST_NAME=
         ;;
       --config )
         [[ -z $val ]] && shift && val=$1
@@ -118,6 +125,9 @@ read_arguments() {
       --command )
         [[ -z $val ]] && shift && val=$1
         DOCKER_RUN_COMMAND="$DOCKER_RUN_COMMAND $val"
+        ;;
+      --no-command )
+        DOCKER_RUN_COMMAND=""
         ;;
       --clear-command )
         DOCKER_RUN_COMMAND=""
@@ -133,12 +143,18 @@ read_arguments() {
         [[ -z $val ]] && shift && val=$1
         HEALTHCHECK=$val
         ;;
+      --no-healthcheck )
+        HEALTHCHECK=
+        ;;
       --timeout )
         [[ -z $val ]] && shift && val=$1
         TIMEOUT=$val
         ;;
       --force )
         FORCE_RESTART="1"
+        ;;
+      --no-force )
+        FORCE_RESTART=
         ;;
       --help )
         usage
@@ -147,6 +163,10 @@ read_arguments() {
       --verbose )
         set -o xtrace
         CMD_OUT=/dev/stdout
+        ;;
+      --no-verbose )
+        set +o xtrace
+        CMD_OUT=/dev/null
         ;;
       -- )
         shift
