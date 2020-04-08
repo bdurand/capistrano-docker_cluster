@@ -17,11 +17,13 @@ end
 
 namespace :deploy do
   after :new_release_path, "docker:create_release"
+  before :updating, "docker:set_image_id"
   after :updating, "docker:update"
   after :published, "docker:restart"
+  after :reverted, "docker:pull_current"
 
-  task :upload do
-  end
+  # task :upload do
+  # end
 end
 
 namespace :docker do
@@ -36,6 +38,7 @@ namespace :docker do
     end
   end
 
+  desc "Set the id of the tagged docker image. This is also set as the REVISION in the deploy."
   task :set_image_id => :build do
     on release_roles(fetch(:docker_roles)).first do
       docker_tag_url =  "#{fetch(:docker_repository)}:#{fetch(:docker_tag)}"
@@ -65,17 +68,30 @@ namespace :docker do
     end
   end
 
-  desc "Pull a tag from a remote into the local docker engine. If the task docker:authenticate is defined, it will be invoked first."
-  task :pull do
-    docker_tag_url =  "#{fetch(:docker_repository)}:#{fetch(:docker_tag)}"
-    if Rake::Task.task_defined?('docker:authenticate')
-      invoke "docker:authenticate"
-    end
+  desc "Pull the tagged docker image from a remote repository into the local docker engine."
+  task :pull => [:authenticate, :set_image_id] do
+    docker_image_url =  "#{fetch(:docker_repository)}:#{fetch(:docker_image_id)}"
     on release_roles(fetch(:docker_roles)) do |host|
       as_docker_user do
-        execute :docker, "pull", docker_tag_url
+        execute :docker, "pull", docker_image_url
       end
     end
+  end
+
+  desc "Pull the image that was used in the release."
+  task :pull_current => :authenticate do
+    on release_roles(fetch(:docker_roles)) do |host|
+      docker_image_url = capture(:cat, "DOCKER_IMAGE_URL")
+      if docker_image_url.include?("/")
+        as_docker_user do
+          execute :docker, "pull", docker_image_url
+        end
+      end
+    end
+  end
+
+  desc "You must implement the docker:authenticate task if your respository requires credentials."
+  task :authenticate do
   end
 
   desc "Restart the docker containers (alias to docker:start)."
@@ -129,10 +145,12 @@ namespace :docker do
 
   desc "Copy configuration files used to start the docker containers."
   task :copy_configs do
+    docker_image_url =  "#{fetch(:docker_repository)}:#{fetch(:docker_image_id)}"
     on release_roles(fetch(:docker_roles)) do |host|
       configs = Capistrano::DockerCluster::Scripts.new(self).docker_config_map(host)
       unless configs.empty?
         within fetch(:release_path) do
+          upload! StringIO.new(docker_image_url), "DOCKER_IMAGE_URL"
           execute(:mkdir, "-p", "config")
           configs.each do |name, local_path|
             upload! local_path, "config/#{name}"

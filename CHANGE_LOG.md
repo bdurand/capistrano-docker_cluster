@@ -1,3 +1,8 @@
+# 1.0.6
+
+* Store docker image url in release directory.
+* Add support to pull the docker image on rollback.
+
 # 1.0.5
 
 * Add "--no-" prefix on arguments to remove them.
