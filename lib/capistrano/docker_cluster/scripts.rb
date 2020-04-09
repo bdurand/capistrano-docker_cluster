@@ -15,7 +15,7 @@ module Capistrano
       def start_script(host)
         apps = Array(fetch_for_host(host, :docker_apps))
         cmd = "exec bin/docker-cluster"
-        image_id = fetch(:docker_image_id)
+        image_id = fetch(:docker_image_id)[7, 12]
         prefix = fetch(:docker_prefix)
 
         cases = []
@@ -28,7 +28,7 @@ module Capistrano
           #!/usr/bin/env bash
 
           # Generated: #{Time.now.utc.iso8601}
-          # Docker image tag: #{fetch(:docker_repository)}/#{fetch(:docker_tag)}
+          # Docker image tag: #{fetch(:docker_repository)}:#{fetch(:docker_tag)}
 
           set -o errexit
 
@@ -59,7 +59,7 @@ module Capistrano
         apps = apps.collect(&:to_s).uniq
 
         cmd = "exec bin/docker-cluster"
-        image_id = fetch(:docker_image_id)
+        image_id = fetch(:docker_image_id)[7, 12]
 
         cases = []
         apps.each do |app|
@@ -71,7 +71,7 @@ module Capistrano
           #!/usr/bin/env bash
 
           # Generated: #{Time.now.utc.iso8601}
-          # Docker image tag: #{fetch(:docker_repository)}/#{fetch(:docker_tag)}
+          # Docker image tag: #{fetch(:docker_repository)}:#{fetch(:docker_tag)}
 
           set -o errexit
 
@@ -104,7 +104,7 @@ module Capistrano
           #!/usr/bin/env bash
 
           # Generated: #{Time.now.utc.iso8601}
-          # Docker image tag: #{fetch(:docker_repository)}/#{fetch(:docker_tag)}
+          # Docker image tag: #{fetch(:docker_repository)}:#{fetch(:docker_tag)}
 
           set -o errexit
 

@@ -17,13 +17,18 @@ end
 
 namespace :deploy do
   after :new_release_path, "docker:create_release"
+
   before :updating, "docker:set_image_id"
+
   after :updating, "docker:update"
+
   after :published, "docker:restart"
+
   after :reverted, "docker:pull_current"
 
-  # task :upload do
-  # end
+  # Required to be defined
+  task :upload do
+  end
 end
 
 namespace :docker do
@@ -34,7 +39,7 @@ namespace :docker do
     end
 
     if fetch(:docker_repository).include?("/")
-       invoke "docker:pull"
+      invoke "docker:pull"
     end
   end
 
@@ -44,7 +49,7 @@ namespace :docker do
       docker_tag_url =  "#{fetch(:docker_repository)}:#{fetch(:docker_tag)}"
       as_docker_user do
         image_id = capture(:docker, "image", "ls", "--no-trunc", "--format", "'{{.ID}}'", docker_tag_url)
-        set :docker_image_id, image_id[7, 12]
+        set :docker_image_id, image_id
       end
     end
   end
@@ -70,7 +75,7 @@ namespace :docker do
 
   desc "Pull the tagged docker image from a remote repository into the local docker engine."
   task :pull => [:authenticate, :set_image_id] do
-    docker_image_url =  "#{fetch(:docker_repository)}:#{fetch(:docker_image_id)}"
+    docker_image_url =  "#{fetch(:docker_repository)}:#{fetch(:docker_tag)}"
     on release_roles(fetch(:docker_roles)) do |host|
       as_docker_user do
         execute :docker, "pull", docker_image_url
@@ -145,16 +150,16 @@ namespace :docker do
 
   desc "Copy configuration files used to start the docker containers."
   task :copy_configs do
-    docker_image_url =  "#{fetch(:docker_repository)}:#{fetch(:docker_image_id)}"
+    docker_image_url =  "#{fetch(:docker_repository)}@#{fetch(:docker_image_id)}"
     on release_roles(fetch(:docker_roles)) do |host|
-      configs = Capistrano::DockerCluster::Scripts.new(self).docker_config_map(host)
-      unless configs.empty?
-        within fetch(:release_path) do
-          upload! StringIO.new(docker_image_url), "DOCKER_IMAGE_URL"
-          execute(:mkdir, "-p", "config")
-          configs.each do |name, local_path|
-            upload! local_path, "config/#{name}"
-          end
+      within fetch(:release_path) do
+        upload! StringIO.new(docker_image_url), "DOCKER_IMAGE_URL"
+        upload! StringIO.new(fetch(:docker_image_id)[7, 12]), "REVISION"
+
+        configs = Capistrano::DockerCluster::Scripts.new(self).docker_config_map(host)
+        execute(:mkdir, "-p", "config")
+        configs.each do |name, local_path|
+          upload! local_path, "config/#{name}"
         end
       end
     end
