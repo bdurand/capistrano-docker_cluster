@@ -77,8 +77,14 @@ namespace :docker do
   task :pull => [:authenticate, :set_image_id] do
     docker_image_url =  "#{fetch(:docker_repository)}:#{fetch(:docker_tag)}"
     on release_roles(fetch(:docker_roles)) do |host|
-      as_docker_user do
-        execute :docker, "pull", docker_image_url
+      within(release_path) do
+        as_docker_user do
+          docker_info = capture(:docker, "pull", docker_image_url)
+          digest = docker_info.match(/Digest: (sha256:[0-9a-f]+)/)
+          if digest
+            execute :echo, "'#{fetch(:docker_repository)}@#{digest[1]}' > DOCKER_IMAGE_URL"
+          end
+        end
       end
     end
   end
@@ -86,10 +92,10 @@ namespace :docker do
   desc "Pull the image that was used in the release."
   task :pull_current => :authenticate do
     on release_roles(fetch(:docker_roles)) do |host|
-      docker_image_url = capture(:cat, "DOCKER_IMAGE_URL")
-      if docker_image_url.include?("/")
-        within "#{fetch(:deploy_to)}/current" do
-          as_docker_user do
+      within "#{fetch(:deploy_to)}/current" do
+        as_docker_user do
+          docker_image_url = capture(:cat, "DOCKER_IMAGE_URL")
+          if docker_image_url.include?("/")
             execute :docker, "pull", docker_image_url
           end
         end
@@ -155,8 +161,7 @@ namespace :docker do
     docker_image_url =  "#{fetch(:docker_repository)}@#{fetch(:docker_image_id)}"
     on release_roles(fetch(:docker_roles)) do |host|
       within fetch(:release_path) do
-        upload! StringIO.new(docker_image_url), "DOCKER_IMAGE_URL"
-        upload! StringIO.new(fetch(:docker_image_id)[7, 12]), "REVISION"
+        execute :echo, "'#{fetch(:docker_image_id)[7, 12]}' > REVISION"
 
         configs = Capistrano::DockerCluster::Scripts.new(self).docker_config_map(host)
         execute(:mkdir, "-p", "config")
