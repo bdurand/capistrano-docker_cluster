@@ -1,3 +1,7 @@
+# 1.0.7
+
+* Fix rollback order so pull and tag is done on release path to get the correct version.
+
 # 1.0.6
 
 * Store docker image url in release directory.

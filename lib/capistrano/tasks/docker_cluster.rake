@@ -82,7 +82,7 @@ namespace :docker do
   desc "Pull the pinned docker image from the current release and tag it."
   task :revert_image => :authenticate do
     on release_roles(fetch(:docker_roles)) do |host|
-      within "#{fetch(:deploy_to)}/current" do
+      within release_path do
         as_docker_user do
           docker_image_url = capture(:cat, "DOCKER_IMAGE_URL")
           if docker_image_url.include?("/")
