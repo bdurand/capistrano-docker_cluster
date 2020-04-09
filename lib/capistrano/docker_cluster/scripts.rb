@@ -15,7 +15,7 @@ module Capistrano
       def start_script(host)
         apps = Array(fetch_for_host(host, :docker_apps))
         cmd = "exec bin/docker-cluster"
-        image_id = fetch(:docker_image_id)[7, 12]
+        image_id = "#{fetch(:docker_repository)}:#{fetch(:docker_tag)}"
         prefix = fetch(:docker_prefix)
 
         cases = []
@@ -59,7 +59,7 @@ module Capistrano
         apps = apps.collect(&:to_s).uniq
 
         cmd = "exec bin/docker-cluster"
-        image_id = fetch(:docker_image_id)[7, 12]
+        image_id = "#{fetch(:docker_repository)}:#{fetch(:docker_tag)}"
 
         cases = []
         apps.each do |app|

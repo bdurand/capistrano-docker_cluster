@@ -2,6 +2,7 @@
 
 * Store docker image url in release directory.
 * Add support to pull the docker image on rollback.
+* Use docker tags in scripts instead of image ids.
 
 # 1.0.5
 
