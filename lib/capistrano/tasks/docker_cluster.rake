@@ -64,7 +64,7 @@ namespace :docker do
     invoke("docker:upload_commands")
   end
 
-  desc "Prune the docker engine of all dangling images, containers, and volumes."
+  desc "Prune the docker engine of all dangling images, containers, and networks."
   task :prune do
     on release_roles(fetch(:docker_roles)) do |host|
       as_docker_user do
@@ -158,7 +158,6 @@ namespace :docker do
 
   desc "Copy configuration files used to start the docker containers."
   task :copy_configs do
-    docker_image_url =  "#{fetch(:docker_repository)}@#{fetch(:docker_image_id)}"
     on release_roles(fetch(:docker_roles)) do |host|
       within fetch(:release_path) do
         execute :echo, "'#{fetch(:docker_image_id)[7, 12]}' > REVISION"
