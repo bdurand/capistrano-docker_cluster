@@ -88,8 +88,10 @@ namespace :docker do
     on release_roles(fetch(:docker_roles)) do |host|
       docker_image_url = capture(:cat, "DOCKER_IMAGE_URL")
       if docker_image_url.include?("/")
-        as_docker_user do
-          execute :docker, "pull", docker_image_url
+        within "#{fetch(:deploy_to)}/current" do
+          as_docker_user do
+            execute :docker, "pull", docker_image_url
+          end
         end
       end
     end
