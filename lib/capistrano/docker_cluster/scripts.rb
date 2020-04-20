@@ -14,14 +14,17 @@ module Capistrano
       # the predefined configuration by calling `bin/start app`.
       def start_script(host)
         apps = Array(fetch_for_host(host, :docker_apps))
-        cmd = "exec bin/docker-cluster"
+        cmd = "bin/docker-cluster"
         image_id = "#{fetch(:docker_repository)}:#{fetch(:docker_tag)}"
         prefix = fetch(:docker_prefix)
 
         cases = []
+        all = []
         apps.each do |app|
           args = app_host_args(app, host)
-          cases << "  '#{app}')\n    #{cmd} #{args.join(' ')} --name '#{prefix}#{app}' --image '#{image_id}' \"$@\"\n    ;;"
+          start_cmd = "#{cmd} #{args.join(' ')} --name '#{prefix}#{app}' --image '#{image_id}' \"$@\""
+          cases << "  '#{app}')\n    exec #{start_cmd}\n    ;;"
+          all << "    #{start_cmd}"
         end
 
         <<~BASH
@@ -35,12 +38,19 @@ module Capistrano
           cd $(dirname $0)/..
 
           typeset app=$1
+          if [ "$app" == "" ]; then
+            >&2 echo "Usage: $0 #{apps.join('|')}|--all"
+            exit 1
+          fi
           shift
 
           case $app in
           #{cases.join("\n")}
+            '--all')
+          #{all.join("\n")}
+              ;;
             *)
-              >&2 echo "Usage: $0 #{apps.join('|')}"
+              >&2 echo "Usage: $0 #{apps.join('|')}|--all"
               exit 1
           esac
         BASH
@@ -78,6 +88,10 @@ module Capistrano
           cd $(dirname $0)/..
 
           typeset app=$1
+          if [ "$app" == "" ]; then
+            >&2 echo "Usage: $0 #{apps.join('|')}"
+            exit 1
+          fi
           shift
 
           case $app in
@@ -97,7 +111,9 @@ module Capistrano
         cases = []
         all = []
         apps.each do |app|
-          cases << "  '#{app}')\n    exec bin/docker-cluster --name '#{prefix}#{app}' --count 0\n    ;;"
+          stop_cmd = "bin/docker-cluster --name '#{prefix}#{app}' --count 0"
+          cases << "  '#{app}')\n    exec #{stop_cmd}\n    ;;"
+          all << "    #{stop_cmd}"
         end
 
         <<~BASH
@@ -111,11 +127,18 @@ module Capistrano
           cd $(dirname $0)/..
 
           typeset app=$1
+          if [ "$app" == "" ]; then
+            >&2 echo "Usage: $0 #{apps.join('|')}|--all"
+            exit 1
+          fi
 
           case $app in
           #{cases.join("\n")}
+            '--all')
+          #{all.join("\n")}
+              ;;
             *)
-              >&2 echo "Usage: $0 #{apps.join('|')}"
+              >&2 echo "Usage: $0 #{apps.join('|')}|--all"
               exit 1
           esac
         BASH

@@ -1,3 +1,7 @@
+# 1.0.8
+
+* Add --all option to start and stop scripts.
+
 # 1.0.7
 
 * Fix rollback order so pull and tag is done on release path to get the correct version.
