@@ -145,6 +145,7 @@ read_arguments() {
         ;;
       --no-healthcheck )
         HEALTHCHECK=
+        DOCKER_RUN_ARGS="$DOCKER_RUN_ARGS --no-healthcheck"
         ;;
       --timeout )
         [[ -z $val ]] && shift && val=$1

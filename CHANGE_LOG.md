@@ -1,3 +1,7 @@
+# 1.0.9
+
+* Pass --no-healthcheck flag through to docker engine.
+
 # 1.0.8
 
 * Add --all option to start and stop scripts.
