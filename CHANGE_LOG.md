@@ -1,3 +1,7 @@
+# 1.0.10
+
+* Update restart task to force restart containers even if they are running the correct image and configuration.
+
 # 1.0.9
 
 * Pass --no-healthcheck flag through to docker engine.

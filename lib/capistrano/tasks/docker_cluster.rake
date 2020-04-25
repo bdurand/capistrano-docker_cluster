@@ -114,10 +114,19 @@ namespace :docker do
 
   desc "Restart the docker containers (alias to docker:start)."
   task :restart do
-    invoke("docker:start")
+    on release_roles(fetch(:docker_roles)) do |host|
+      within "#{fetch(:deploy_to)}/current" do
+        scripts = Capistrano::DockerCluster::Scripts.new(self)
+        Array(scripts.fetch_for_host(host, :docker_apps)).each do |app|
+          as_docker_user do
+            execute "bin/start", app, "--force"
+          end
+        end
+      end
+    end
   end
 
-  desc "Restart the docker containers."
+  desc "Start the docker containers."
   task :start do
     on release_roles(fetch(:docker_roles)) do |host|
       within "#{fetch(:deploy_to)}/current" do
