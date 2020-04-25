@@ -26,6 +26,8 @@ namespace :deploy do
 
   after :reverted, "docker:revert_image"
 
+  task :restart => "docker:restart"
+
   # Required to be defined
   task :upload do
   end
