@@ -20,6 +20,8 @@ The deployment is configured with the following properties in your capistrano re
 
 * `docker_roles` - List of server roles that will run docker containers. This defaults to `:docker`, but you can change it to whatever server roles you have in your recipe.
 
+* `docker_run_only_roles` - List of additional server roles to deploy the docker scripts and image to. This is optional and can be used where you have servers that need to run one off processes using the docker image but don't need to run daemon processes.
+
 * `docker_user` - User to use when running docker commands on the remote host. This user must have access to the docker daemon. Default to the default capistrano user.
 
 * `docker_env` - Environment variables needed to run docker commands. You may need to set `HOME` if you are pulling docker images from a remote repository using a use that is not the default deploy user.

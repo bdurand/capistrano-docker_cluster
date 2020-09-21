@@ -1,3 +1,8 @@
+# 1.0.11
+
+* Add `:docker_run_only_roles` to allow deploying scripts to servers that do not run daemon processes.
+
+
 # 1.0.10
 
 * Update restart task to force restart containers even if they are running the correct image and configuration.
